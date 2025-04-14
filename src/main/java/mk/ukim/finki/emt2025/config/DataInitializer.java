@@ -1,11 +1,17 @@
+package mk.ukim.finki.emt2025.config;
+
 import jakarta.annotation.PostConstruct;
-import mk.ukim.finki.emt2025.model.Country;
-import mk.ukim.finki.emt2025.model.Host;
+import mk.ukim.finki.emt2025.model.domain.Country;
+import mk.ukim.finki.emt2025.model.domain.Host;
+import mk.ukim.finki.emt2025.model.domain.User;
 import mk.ukim.finki.emt2025.model.dto.AccommodationCreateDto;
-import mk.ukim.finki.emt2025.model.AccommodationCategory;
+import mk.ukim.finki.emt2025.model.enumerations.AccommodationCategory;
+import mk.ukim.finki.emt2025.model.enumerations.Role;
 import mk.ukim.finki.emt2025.repository.CountryRepository;
 import mk.ukim.finki.emt2025.repository.HostRepository;
-import mk.ukim.finki.emt2025.service.AccommodationService;
+import mk.ukim.finki.emt2025.repository.UserRepository;
+import mk.ukim.finki.emt2025.service.domain.AccommodationService;
+import mk.ukim.finki.emt2025.service.domain.UserService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,13 +20,16 @@ public class DataInitializer {
     private final CountryRepository countryRepository;
     private final HostRepository hostRepository;
     private final AccommodationService accommodationService;
+    private final UserService userService;
 
     public DataInitializer(CountryRepository countryRepository,
                            HostRepository hostRepository,
-                           AccommodationService accommodationService) {
+                           AccommodationService accommodationService,
+                           UserService userService) {
         this.countryRepository = countryRepository;
         this.hostRepository = hostRepository;
         this.accommodationService = accommodationService;
+        this.userService = userService;
     }
 
     @PostConstruct
@@ -64,6 +73,10 @@ public class DataInitializer {
                     johnDoe.getId(),
                     1
             ));
+
+            // Create users
+            this.userService.register("user", "user", "user", "Regular", "User", Role.ROLE_USER);
+            this.userService.register("host", "host", "host", "Admin", "Host", Role.ROLE_HOST);
         }
     }
 }

@@ -1,11 +1,10 @@
-package mk.ukim.finki.emt2025.service.impl;
+package mk.ukim.finki.emt2025.service.domain.impl;
 
-import mk.ukim.finki.emt2025.model.Country;
+import mk.ukim.finki.emt2025.model.domain.Country;
 import mk.ukim.finki.emt2025.model.dto.CountryCreateDto;
-import mk.ukim.finki.emt2025.model.dto.CountryDto;
 import mk.ukim.finki.emt2025.model.exceptions.CountryNotFoundException;
 import mk.ukim.finki.emt2025.repository.CountryRepository;
-import mk.ukim.finki.emt2025.service.CountryService;
+import mk.ukim.finki.emt2025.service.domain.CountryService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,14 +49,5 @@ public class CountryServiceImpl implements CountryService {
     @Override
     public void deleteById(Long id) {
         this.countryRepository.deleteById(id);
-    }
-
-    @Override
-    public CountryDto toDto(Country country) {
-        return new CountryDto(
-                country.getId(),
-                country.getName(),
-                country.getContinent()
-        );
     }
 }

@@ -1,8 +1,7 @@
 package mk.ukim.finki.emt2025.model.dto;
 
-
 import lombok.Data;
-import mk.ukim.finki.emt2025.model.AccommodationCategory;
+import mk.ukim.finki.emt2025.model.enumerations.AccommodationCategory;
 
 @Data
 public class AccommodationCreateDto {

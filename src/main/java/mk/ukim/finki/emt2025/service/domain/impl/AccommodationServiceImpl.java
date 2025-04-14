@@ -1,15 +1,13 @@
-package mk.ukim.finki.emt2025.service.impl;
+package mk.ukim.finki.emt2025.service.domain.impl;
 
-import mk.ukim.finki.emt2025.model.Accommodation;
-import mk.ukim.finki.emt2025.model.Host;
+import mk.ukim.finki.emt2025.model.domain.Accommodation;
+import mk.ukim.finki.emt2025.model.domain.Host;
 import mk.ukim.finki.emt2025.model.dto.AccommodationCreateDto;
-import mk.ukim.finki.emt2025.model.dto.AccommodationDto;
 import mk.ukim.finki.emt2025.model.exceptions.AccommodationNotFoundException;
 import mk.ukim.finki.emt2025.model.exceptions.HostNotFoundException;
 import mk.ukim.finki.emt2025.repository.AccommodationRepository;
 import mk.ukim.finki.emt2025.repository.HostRepository;
-import mk.ukim.finki.emt2025.service.AccommodationService;
-import mk.ukim.finki.emt2025.service.HostService;
+import mk.ukim.finki.emt2025.service.domain.AccommodationService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,14 +18,11 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     private final AccommodationRepository accommodationRepository;
     private final HostRepository hostRepository;
-    private final HostService hostService;
 
     public AccommodationServiceImpl(AccommodationRepository accommodationRepository,
-                                    HostRepository hostRepository,
-                                    HostService hostService) {
+                                    HostRepository hostRepository) {
         this.accommodationRepository = accommodationRepository;
         this.hostRepository = hostRepository;
-        this.hostService = hostService;
     }
 
     @Override
@@ -86,14 +81,7 @@ public class AccommodationServiceImpl implements AccommodationService {
     }
 
     @Override
-    public AccommodationDto toDto(Accommodation accommodation) {
-        return new AccommodationDto(
-                accommodation.getId(),
-                accommodation.getName(),
-                accommodation.getCategory(),
-                this.hostService.toDto(accommodation.getHost()),
-                accommodation.getNumRooms(),
-                accommodation.getIsRented()
-        );
+    public List<Accommodation> findAvailableAccommodations() {
+        return this.accommodationRepository.findByIsRented(false);
     }
 }

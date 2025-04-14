@@ -1,7 +1,8 @@
 package mk.ukim.finki.emt2025.model.dto;
 
 import lombok.Data;
-import mk.ukim.finki.emt2025.model.AccommodationCategory;
+import mk.ukim.finki.emt2025.model.domain.Accommodation;
+import mk.ukim.finki.emt2025.model.enumerations.AccommodationCategory;
 
 @Data
 public class AccommodationDto {
@@ -22,5 +23,16 @@ public class AccommodationDto {
         this.host = host;
         this.numRooms = numRooms;
         this.isRented = isRented;
+    }
+
+    public static AccommodationDto from(Accommodation accommodation, HostDto hostDto) {
+        return new AccommodationDto(
+                accommodation.getId(),
+                accommodation.getName(),
+                accommodation.getCategory(),
+                hostDto,
+                accommodation.getNumRooms(),
+                accommodation.getIsRented()
+        );
     }
 }

@@ -1,5 +1,5 @@
-package mk.ukim.finki.emt2025.model.dto;
 
+package mk.ukim.finki.emt2025.model.dto;
 
 import lombok.Data;
 

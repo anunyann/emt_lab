@@ -1,15 +1,13 @@
-package mk.ukim.finki.emt2025.service.impl;
+package mk.ukim.finki.emt2025.service.domain.impl;
 
-import mk.ukim.finki.emt2025.model.Country;
-import mk.ukim.finki.emt2025.model.Host;
+import mk.ukim.finki.emt2025.model.domain.Country;
+import mk.ukim.finki.emt2025.model.domain.Host;
 import mk.ukim.finki.emt2025.model.dto.HostCreateDto;
-import mk.ukim.finki.emt2025.model.dto.HostDto;
 import mk.ukim.finki.emt2025.model.exceptions.CountryNotFoundException;
 import mk.ukim.finki.emt2025.model.exceptions.HostNotFoundException;
 import mk.ukim.finki.emt2025.repository.CountryRepository;
 import mk.ukim.finki.emt2025.repository.HostRepository;
-import mk.ukim.finki.emt2025.service.CountryService;
-import mk.ukim.finki.emt2025.service.HostService;
+import mk.ukim.finki.emt2025.service.domain.HostService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,14 +18,11 @@ public class HostServiceImpl implements HostService {
 
     private final HostRepository hostRepository;
     private final CountryRepository countryRepository;
-    private final CountryService countryService;
 
     public HostServiceImpl(HostRepository hostRepository,
-                           CountryRepository countryRepository,
-                           CountryService countryService) {
+                           CountryRepository countryRepository) {
         this.hostRepository = hostRepository;
         this.countryRepository = countryRepository;
-        this.countryService = countryService;
     }
 
     @Override
@@ -67,15 +62,5 @@ public class HostServiceImpl implements HostService {
     @Override
     public void deleteById(Long id) {
         this.hostRepository.deleteById(id);
-    }
-
-    @Override
-    public HostDto toDto(Host host) {
-        return new HostDto(
-                host.getId(),
-                host.getName(),
-                host.getSurname(),
-                this.countryService.toDto(host.getCountry())
-        );
     }
 }
