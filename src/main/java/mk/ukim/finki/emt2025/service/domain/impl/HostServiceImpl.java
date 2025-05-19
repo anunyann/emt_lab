@@ -1,5 +1,6 @@
 package mk.ukim.finki.emt2025.service.domain.impl;
 
+import mk.ukim.finki.emt2025.events.HostEvent;
 import mk.ukim.finki.emt2025.model.domain.Country;
 import mk.ukim.finki.emt2025.model.domain.Host;
 import mk.ukim.finki.emt2025.model.dto.HostCreateDto;
@@ -8,6 +9,7 @@ import mk.ukim.finki.emt2025.model.exceptions.HostNotFoundException;
 import mk.ukim.finki.emt2025.repository.CountryRepository;
 import mk.ukim.finki.emt2025.repository.HostRepository;
 import mk.ukim.finki.emt2025.service.domain.HostService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,11 +20,14 @@ public class HostServiceImpl implements HostService {
 
     private final HostRepository hostRepository;
     private final CountryRepository countryRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public HostServiceImpl(HostRepository hostRepository,
-                           CountryRepository countryRepository) {
+                           CountryRepository countryRepository,
+                           ApplicationEventPublisher eventPublisher) {
         this.hostRepository = hostRepository;
         this.countryRepository = countryRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -41,7 +46,12 @@ public class HostServiceImpl implements HostService {
                 .orElseThrow(() -> new CountryNotFoundException(hostDto.getCountryId()));
 
         Host host = new Host(hostDto.getName(), hostDto.getSurname(), country);
-        return Optional.of(this.hostRepository.save(host));
+        Host savedHost = this.hostRepository.save(host);
+
+        // Publish event for host creation
+        eventPublisher.publishEvent(new HostEvent(savedHost, "CREATE"));
+
+        return Optional.of(savedHost);
     }
 
     @Override
@@ -56,11 +66,22 @@ public class HostServiceImpl implements HostService {
         host.setSurname(hostDto.getSurname());
         host.setCountry(country);
 
-        return Optional.of(this.hostRepository.save(host));
+        Host updatedHost = this.hostRepository.save(host);
+
+        // Publish event for host update
+        eventPublisher.publishEvent(new HostEvent(updatedHost, "UPDATE"));
+
+        return Optional.of(updatedHost);
     }
 
     @Override
     public void deleteById(Long id) {
+        Host host = this.hostRepository.findById(id)
+                .orElseThrow(() -> new HostNotFoundException(id));
+
         this.hostRepository.deleteById(id);
+
+        // Publish event for host deletion
+        eventPublisher.publishEvent(new HostEvent(host, "DELETE"));
     }
 }
