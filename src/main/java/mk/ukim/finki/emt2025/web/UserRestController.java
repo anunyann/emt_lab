@@ -1,84 +1,91 @@
 package mk.ukim.finki.emt2025.web;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
+import mk.ukim.finki.emt2025.config.security.JwtUtils;
+import mk.ukim.finki.emt2025.model.domain.User;
+import mk.ukim.finki.emt2025.model.dto.JwtResponse;
 import mk.ukim.finki.emt2025.model.dto.UserCreateDto;
 import mk.ukim.finki.emt2025.model.dto.UserDto;
 import mk.ukim.finki.emt2025.model.dto.UserLoginDto;
-import mk.ukim.finki.emt2025.model.exceptions.InvalidUserCredentialsException;
-import mk.ukim.finki.emt2025.model.exceptions.PasswordsDoNotMatchException;
-import mk.ukim.finki.emt2025.service.application.UserApplicationService;
+import mk.ukim.finki.emt2025.service.domain.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
-@Tag(name = "User API", description = "Endpoints for user authentication and management")
 public class UserRestController {
 
-    private final UserApplicationService userService;
+    private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
 
-    public UserRestController(UserApplicationService userService) {
+    public UserRestController(UserService userService,
+                              AuthenticationManager authenticationManager,
+                              JwtUtils jwtUtils) {
         this.userService = userService;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtils = jwtUtils;
     }
 
-    @Operation(summary = "Register a new user", description = "Creates a new user account")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User registered successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid registration data")
-    })
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@RequestBody UserCreateDto userCreateDto) {
+    public ResponseEntity<?> register(@RequestBody UserCreateDto userCreateDto) {
         try {
-            return this.userService.register(userCreateDto)
-                    .map(user -> ResponseEntity.ok(user))
-                    .orElseGet(() -> ResponseEntity.badRequest().build());
+            User user = userService.register(
+                    userCreateDto.getUsername(),
+                    userCreateDto.getPassword(),
+                    userCreateDto.getRepeatPassword(),
+                    userCreateDto.getName(),
+                    userCreateDto.getSurname(),
+                    userCreateDto.getRole()
+            );
+
+            UserDto userDto = new UserDto(
+                    user.getUsername(),
+                    user.getName(),
+                    user.getSurname(),
+                    user.getRole()
+            );
+            return ResponseEntity.ok(userDto);
         } catch (RuntimeException exception) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(exception.getMessage());
         }
     }
 
-    @Operation(summary = "User login", description = "Authenticates a user and returns user details")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User logged in successfully"),
-            @ApiResponse(responseCode = "401", description = "Invalid credentials")
-    })
     @PostMapping("/login")
-    public ResponseEntity<UserDto> login(@RequestBody UserLoginDto userLoginDto) {
+    public ResponseEntity<?> login(@RequestBody UserLoginDto userLoginDto) {
         try {
-            return this.userService.login(userLoginDto)
-                    .map(user -> ResponseEntity.ok(user))
-                    .orElseGet(() -> ResponseEntity.status(401).build());
-        } catch (InvalidUserCredentialsException exception) {
-            return ResponseEntity.status(401).build();
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            userLoginDto.getUsername(),
+                            userLoginDto.getPassword()
+                    )
+            );
+
+            User user = (User) authentication.getPrincipal();
+            String jwt = jwtUtils.generateToken(user);
+
+            return ResponseEntity.ok(new JwtResponse(jwt));
+
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(401).body("Invalid username or password");
         }
     }
 
-    @Operation(summary = "Get current user", description = "Retrieves the currently authenticated user's details")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User details retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "User not found")
-    })
     @GetMapping("/current")
-    public ResponseEntity<UserDto> getCurrentUser(HttpServletRequest request) {
-        String username = request.getRemoteUser();
-        if (username == null) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            User user = (User) authentication.getPrincipal();
+            UserDto userDto = new UserDto(
+                    user.getUsername(),
+                    user.getName(),
+                    user.getSurname(),
+                    user.getRole()
+            );
+            return ResponseEntity.ok(userDto);
         }
-
-        return this.userService.findByUsername(username)
-                .map(user -> ResponseEntity.ok(user))
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @Operation(summary = "User logout", description = "Logs out the current user")
-    @ApiResponse(responseCode = "200", description = "User logged out successfully")
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request) {
-        request.getSession().invalidate();
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(401).body("User not authenticated");
     }
 }

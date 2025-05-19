@@ -7,6 +7,7 @@ import mk.ukim.finki.emt2025.service.application.CountryApplicationService;
 import mk.ukim.finki.emt2025.service.application.HostApplicationService;
 import mk.ukim.finki.emt2025.service.domain.HostService;
 import org.springframework.stereotype.Service;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.Optional;

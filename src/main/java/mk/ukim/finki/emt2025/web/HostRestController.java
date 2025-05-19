@@ -6,6 +6,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import mk.ukim.finki.emt2025.model.dto.HostCreateDto;
 import mk.ukim.finki.emt2025.model.dto.HostDto;
+import mk.ukim.finki.emt2025.model.projections.HostNameProjection;
+import mk.ukim.finki.emt2025.model.views.HostsPerCountryView;
+import mk.ukim.finki.emt2025.repository.HostRepository;
+import mk.ukim.finki.emt2025.repository.HostsPerCountryViewRepository;
 import mk.ukim.finki.emt2025.service.application.HostApplicationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,9 +23,13 @@ import java.util.List;
 public class HostRestController {
 
     private final HostApplicationService hostService;
+    private final HostsPerCountryViewRepository hostsPerCountryViewRepository;
+    private final HostRepository hostRepository;
 
-    public HostRestController(HostApplicationService hostService) {
+    public HostRestController(HostApplicationService hostService, HostsPerCountryViewRepository hostsPerCountryViewRepository, HostRepository hostRepository) {
         this.hostService = hostService;
+        this.hostsPerCountryViewRepository = hostsPerCountryViewRepository;
+        this.hostRepository = hostRepository;
     }
 
     @Operation(summary = "Get all hosts", description = "Retrieves a list of all hosts")
@@ -81,5 +89,13 @@ public class HostRestController {
     public ResponseEntity<Void> deleteHost(@PathVariable Long id) {
         this.hostService.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+    @GetMapping("/by-country")
+    public ResponseEntity<List<HostsPerCountryView>> getHostsByCountry() {
+        return ResponseEntity.ok(hostsPerCountryViewRepository.findAll());
+    }
+    @GetMapping("/names")
+    public ResponseEntity<List<HostNameProjection>> getHostNames() {
+        return ResponseEntity.ok(hostRepository.findAllHostNames());
     }
 }

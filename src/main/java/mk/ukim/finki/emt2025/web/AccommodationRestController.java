@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import mk.ukim.finki.emt2025.model.dto.AccommodationCreateDto;
 import mk.ukim.finki.emt2025.model.dto.AccommodationDto;
+import mk.ukim.finki.emt2025.model.views.AccommodationsPerHostView;
+import mk.ukim.finki.emt2025.repository.AccommodationsPerHostViewRepository;
 import mk.ukim.finki.emt2025.service.application.AccommodationApplicationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,9 +21,11 @@ import java.util.List;
 public class AccommodationRestController {
 
     private final AccommodationApplicationService accommodationService;
+    private final AccommodationsPerHostViewRepository accommodationsPerHostViewRepository;
 
-    public AccommodationRestController(AccommodationApplicationService accommodationService) {
+    public AccommodationRestController(AccommodationApplicationService accommodationService, AccommodationsPerHostViewRepository accommodationsPerHostViewRepository) {
         this.accommodationService = accommodationService;
+        this.accommodationsPerHostViewRepository = accommodationsPerHostViewRepository;
     }
 
     @Operation(summary = "Get all accommodations", description = "Retrieves a list of all accommodations")
@@ -103,5 +107,11 @@ public class AccommodationRestController {
     public ResponseEntity<Void> deleteAccommodation(@PathVariable Long id) {
         this.accommodationService.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    // Add this to your AccommodationRestController
+    @GetMapping("/by-host")
+    public ResponseEntity<List<AccommodationsPerHostView>> getAccommodationsByHost() {
+        return ResponseEntity.ok(accommodationsPerHostViewRepository.findAll());
     }
 }
