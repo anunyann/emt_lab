@@ -12,7 +12,16 @@ import {
     DialogActions,
     Grid
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Room as RoomIcon } from '@mui/icons-material';
+import {
+    Edit as EditIcon,
+    Delete as DeleteIcon,
+    Room as RoomIcon,
+    Person as PersonIcon,
+    Public as PublicIcon,
+    KingBed as BedroomIcon,
+    Lock as LockIcon,
+    CheckCircle as CheckCircleIcon
+} from '@mui/icons-material';
 import AccommodationForm from './AccommodationForm';
 import useAccommodations from '../../hooks/useAccommodations';
 
@@ -77,64 +86,147 @@ const AccommodationList = () => {
             <Grid container spacing={2}>
                 {accommodations.map(accommodation => (
                     <Grid item xs={12} md={6} lg={4} key={accommodation.id}>
-                        <Paper sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                <Typography variant="h6" gutterBottom>
-                                    {accommodation.name}
-                                </Typography>
-                                <Box>
+                        <Paper
+                            sx={{
+                                p: 0,
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                overflow: 'hidden',
+                                borderRadius: 2,
+                                transition: 'transform 0.3s, box-shadow 0.3s',
+                                '&:hover': {
+                                    transform: 'translateY(-5px)',
+                                    boxShadow: 6
+                                }
+                            }}
+                        >
+                            {/* Card Header Image */}
+                            <Box
+                                sx={{
+                                    height: 180,
+                                    bgcolor: (theme) => theme.palette.primary.light,
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}
+                            >
+                                {/* Add an icon or image placeholder here */}
+                                <Box
+                                    sx={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        right: 0,
+                                        p: 1,
+                                        display: 'flex',
+                                        gap: 0.5
+                                    }}
+                                >
                                     <IconButton
                                         size="small"
                                         color="primary"
-                                        onClick={() => handleOpenEdit(accommodation)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleOpenEdit(accommodation);
+                                        }}
+                                        sx={{
+                                            bgcolor: 'white',
+                                            '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
+                                        }}
                                     >
-                                        <EditIcon />
+                                        <EditIcon fontSize="small" />
                                     </IconButton>
                                     <IconButton
                                         size="small"
                                         color="error"
-                                        onClick={() => handleOpenDelete(accommodation)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleOpenDelete(accommodation);
+                                        }}
+                                        sx={{
+                                            bgcolor: 'white',
+                                            '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
+                                        }}
                                     >
-                                        <DeleteIcon />
+                                        <DeleteIcon fontSize="small" />
                                     </IconButton>
                                 </Box>
+
+                                {/* Category Badge */}
+                                <Chip
+                                    label={accommodation.category}
+                                    color="primary"
+                                    size="small"
+                                    sx={{
+                                        position: 'absolute',
+                                        bottom: 10,
+                                        left: 10,
+                                        fontWeight: 'bold'
+                                    }}
+                                />
                             </Box>
 
-                            <Typography variant="body2">
-                                <strong>Category:</strong> {accommodation.category}
-                            </Typography>
-                            <Typography variant="body2">
-                                <strong>Host:</strong> {accommodation.host?.name} {accommodation.host?.surname}
-                            </Typography>
-                            <Typography variant="body2">
-                                <strong>Rooms:</strong> {accommodation.numRooms}
-                            </Typography>
+                            {/* Card Content */}
+                            <Box sx={{ p: 2, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                                <Typography variant="h6" gutterBottom>
+                                    {accommodation.name}
+                                </Typography>
 
-                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                {accommodation.isRented ? (
-                                    <Chip color="error" label="Rented" />
-                                ) : (
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
-                                        startIcon={<RoomIcon />}
-                                        onClick={() => handleRent(accommodation.id)}
-                                    >
-                                        Mark as Rented
-                                    </Button>
-                                )}
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                    <PersonIcon fontSize="small" color="action" sx={{ mr: 1 }} />
+                                    <Typography variant="body2">
+                                        {accommodation.host?.name} {accommodation.host?.surname}
+                                    </Typography>
+                                </Box>
+
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                    <PublicIcon fontSize="small" color="action" sx={{ mr: 1 }} />
+                                    <Typography variant="body2">
+                                        {accommodation.host?.country?.name}
+                                    </Typography>
+                                </Box>
+
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                    <BedroomIcon fontSize="small" color="action" sx={{ mr: 1 }} />
+                                    <Typography variant="body2">
+                                        {accommodation.numRooms} {accommodation.numRooms === 1 ? 'Room' : 'Rooms'}
+                                    </Typography>
+                                </Box>
+
+                                <Box sx={{ mt: 'auto' }}>
+                                    {accommodation.isRented ? (
+                                        <Chip
+                                            color="error"
+                                            label="Rented"
+                                            icon={<LockIcon />}
+                                            variant="outlined"
+                                            sx={{ width: '100%' }}
+                                        />
+                                    ) : (
+                                        <Button
+                                            variant="contained"
+                                            fullWidth
+                                            startIcon={<CheckCircleIcon />}
+                                            onClick={() => handleRent(accommodation.id)}
+                                            color="success"
+                                        >
+                                            Mark as Rented
+                                        </Button>
+                                    )}
+                                </Box>
                             </Box>
                         </Paper>
                     </Grid>
                 ))}
             </Grid>
 
+            {/* Add Accommodation Dialog */}
             <AccommodationForm
                 open={openAddDialog}
                 handleClose={() => setOpenAddDialog(false)}
                 onSubmit={handleCreate}
             />
 
+            {/* Edit Accommodation Dialog */}
             <AccommodationForm
                 open={openEditDialog}
                 handleClose={() => setOpenEditDialog(false)}
@@ -142,6 +234,7 @@ const AccommodationList = () => {
                 onSubmit={handleUpdate}
             />
 
+            {/* Delete Confirmation Dialog */}
             <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
                 <DialogTitle>Confirm Delete</DialogTitle>
                 <DialogContent>
