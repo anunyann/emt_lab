@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: emt-frontend
+  namespace: emt-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: emt-frontend
+  template:
+    metadata:
+      labels:
+        app: emt-frontend
+    spec:
+      containers:
+        - name: emt-frontend
+          image: anunyan1/emt-frontend:latest
+          ports:
+            - containerPort: 80

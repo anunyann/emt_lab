@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: emt-backend
+  namespace: emt-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: emt-backend
+  template:
+    metadata:
+      labels:
+        app: emt-backend
+    spec:
+      containers:
+        - name: backend
+          image: anunyan1/emt-backend:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/emt_airbnb
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: postgres

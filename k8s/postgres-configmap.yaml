@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: emt-lab
+data:
+  POSTGRES_DB: "emt_airbnb"
+  POSTGRES_USER: "postgres"
