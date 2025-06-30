@@ -4,15 +4,15 @@ metadata:
   name: emt-ingress
   namespace: emt-lab
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
   rules:
-    - host: emt.anunyan.me
-      http:
+    - http:
         paths:
-          - path: /
-            pathType: Prefix
+          - path: /()(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: emt-frontend
